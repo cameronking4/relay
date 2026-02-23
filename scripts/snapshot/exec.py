@@ -150,12 +150,26 @@ class HttpExecClient:
                     time.sleep(delay)
                     last_error = exc
                     continue
-                raise RuntimeError(f"exec service request failed: {exc}") from exc
+                raise RuntimeError(
+                    f"exec service request failed (url={url!r}): {exc}"
+                ) from exc
             except urllib.error.URLError as exc:
-                raise RuntimeError(f"exec service request failed: {exc}") from exc
+                last_error = exc
+                if attempt < max_retries - 1:
+                    delay = initial_delay * (2**attempt)
+                    self._console.info(
+                        f"[{label}] Connection/DNS error ({exc.reason}), retrying in "
+                        f"{delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                    )
+                    time.sleep(delay)
+                    continue
+                raise RuntimeError(
+                    f"exec service request failed (url={url!r}): {exc}. "
+                    "Check that the Morph exec hostname resolves (DNS) and the instance is reachable."
+                ) from exc
         else:
             raise RuntimeError(
-                f"exec service request failed after {max_retries} retries: {last_error}"
+                f"exec service request failed after {max_retries} retries (url={url!r}): {last_error}"
             ) from last_error
 
         stdout_parts: list[str] = []

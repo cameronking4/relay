@@ -1443,30 +1443,30 @@ async def task_install_ide_extensions(ctx: TaskContext) -> None:
           local destination="$4"
           local tmpfile="${{destination}}.download"
           local curl_stderr="${{tmpfile}}.stderr"
-          local url="https://marketplace.visualstudio.com/_apis/public/gallery/publishers/${{publisher}}/vsextensions/${{name}}/${{version}}/vspackage"
-          local attempt=1
-          local max_attempts=3
-          while [ "${{attempt}}" -le "${{max_attempts}}" ]; do
-            if curl -fSL --retry 6 --retry-all-errors --retry-delay 2 --connect-timeout 20 --max-time 600 -o "${{tmpfile}}" "${{url}}" 2>"${{curl_stderr}}"; then
-              rm -f "${{curl_stderr}}"
-              break
-            fi
-            echo "Download attempt ${{attempt}}/${{max_attempts}} failed for ${{publisher}}.${{name}}@${{version}}; retrying..." >&2
-            if [ -s "${{curl_stderr}}" ]; then
-              cat "${{curl_stderr}}" >&2
-            fi
+          try_download() {{
+            local url="$1"
+            curl -fSL --retry 2 --retry-all-errors --retry-delay 2 --connect-timeout 20 --max-time 300 -o "${{tmpfile}}" "${{url}}" 2>"${{curl_stderr}}"
+          }}
+          local url_ms="https://marketplace.visualstudio.com/_apis/public/gallery/publishers/${{publisher}}/vsextensions/${{name}}/${{version}}/vspackage"
+          local url_ovsx="https://open-vsx.org/api/${{publisher}}/${{name}}/${{version}}/file/vspackage"
+          local ok=0
+          for attempt in 1 2 3; do
+            if try_download "${{url_ms}}"; then ok=1; break; fi
+            echo "Marketplace attempt ${{attempt}}/3 failed for ${{publisher}}.${{name}}@${{version}}" >&2
+            [ -s "${{curl_stderr}}" ] && cat "${{curl_stderr}}" >&2
             rm -f "${{tmpfile}}"
-            attempt=$((attempt + 1))
             sleep $((attempt * 2))
           done
-          if [ "${{attempt}}" -gt "${{max_attempts}}" ]; then
-            echo "Failed to download ${{publisher}}.${{name}}@${{version}} after ${{max_attempts}} attempts" >&2
-            if [ -s "${{curl_stderr}}" ]; then
-              cat "${{curl_stderr}}" >&2
-            fi
+          if [ "${{ok}}" -eq 0 ]; then
+            echo "Trying Open VSX fallback for ${{publisher}}.${{name}}@${{version}}" >&2
+            if try_download "${{url_ovsx}}"; then ok=1; fi
+          fi
+          if [ "${{ok}}" -eq 0 ]; then
             rm -f "${{curl_stderr}}"
+            echo "Warning: skipped ${{publisher}}.${{name}}@${{version}} (marketplace and Open VSX failed)" >&2
             return 1
           fi
+          rm -f "${{curl_stderr}}"
           if gzip -t "${{tmpfile}}" >/dev/null 2>&1; then
             gunzip -c "${{tmpfile}}" > "${{destination}}"
             rm -f "${{tmpfile}}"
@@ -1474,13 +1474,18 @@ async def task_install_ide_extensions(ctx: TaskContext) -> None:
             mv "${{tmpfile}}" "${{destination}}"
           fi
         }}
+        failed=0
         while IFS='|' read -r publisher name version; do
           [ -z "${{publisher}}" ] && continue
-          download_extension "${{publisher}}" "${{name}}" "${{version}}" "${{download_dir}}/${{publisher}}.${{name}}.vsix" &
+          if ! download_extension "${{publisher}}" "${{name}}" "${{version}}" "${{download_dir}}/${{publisher}}.${{name}}.vsix"; then
+            failed=$((failed + 1))
+          fi
         done <<'EXTENSIONS'
 {extensions_blob}
 EXTENSIONS
-        wait
+        if [ "${{failed}}" -gt 0 ]; then
+          echo "Warning: ${{failed}} extension(s) could not be downloaded; installing the rest." >&2
+        fi
         set -- "${{download_dir}}"/*.vsix
         for vsix in "$@"; do
           if [ -f "${{vsix}}" ]; then
@@ -2524,14 +2529,24 @@ async def provision_and_snapshot_for_preset(
     )
     timings = TimingsCollector()
 
-    instance = await client.instances.aboot(
-        args.snapshot_id,
-        vcpus=preset.vcpus,
-        memory=preset.memory_mib,
-        disk_size=preset.disk_size_mib,
-        ttl_seconds=args.ttl_seconds,
-        ttl_action=args.ttl_action,
-    )
+    try:
+        instance = await client.instances.aboot(
+            args.snapshot_id,
+            vcpus=preset.vcpus,
+            memory=preset.memory_mib,
+            disk_size=preset.disk_size_mib,
+            ttl_seconds=args.ttl_seconds,
+            ttl_action=args.ttl_action,
+        )
+    except ApiError as e:
+        if e.status_code == 404 and "snapshot" in str(e.error_body or "").lower():
+            raise RuntimeError(
+                f"Snapshot {args.snapshot_id!r} not found in your Morph account. "
+                "If this is a new account (no base snapshot yet), create one first by running:\n"
+                "  python3 ./scripts/snapshot.py --image-id morphvm-minimal\n"
+                "Then re-run with that snapshot id or run again with --image-id to build presets."
+            ) from e
+        raise
     await instance.aset_wake_on(wake_on_http=True)
     started_instances.append(instance)
     await _await_instance_ready(instance, console=console)
@@ -2626,6 +2641,20 @@ async def provision_and_snapshot(args: argparse.Namespace) -> None:
     started_instances: list[Instance] = []
     manifest = _load_manifest(console)
     results: list[SnapshotRunResult] = []
+
+    # If --image-id is set, create a one-off base snapshot from that image (for new Morph accounts).
+    if getattr(args, "image_id", None):
+        image_id = args.image_id
+        console.always(f"Creating base snapshot from image {image_id!r} (for new Morph account)...")
+        base_snapshot = await asyncio.to_thread(
+            client.snapshots.create,
+            image_id=image_id,
+            vcpus=args.standard_vcpus,
+            memory=args.standard_memory,
+            disk_size=args.standard_disk_size,
+        )
+        args.snapshot_id = base_snapshot.id
+        console.always(f"Base snapshot created: {args.snapshot_id}\n")
 
     def _cleanup() -> None:
         if args.require_verify:
@@ -2728,7 +2757,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--snapshot-id",
         default="snapshot_3fjuvxbs",
-        help="Base snapshot id to boot from",
+        help="Base snapshot id to boot from (default is repo baseline; use --image-id morphvm-minimal for a new Morph account)",
+    )
+    parser.add_argument(
+        "--image-id",
+        default=None,
+        metavar="IMAGE_ID",
+        help="Create base snapshot from this Morph image (e.g. morphvm-minimal) and use it as base. Use when you have a new Morph account with no existing base snapshot.",
     )
     parser.add_argument(
         "--repo-root",

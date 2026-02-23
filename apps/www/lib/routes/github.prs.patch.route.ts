@@ -5,7 +5,7 @@ import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "octokit";
 import { getConvex } from "../utils/get-convex";
-import { githubPrivateKey } from "../utils/githubPrivateKey";
+import { githubPrivateKey, isGitHubAppConfigured } from "../utils/githubPrivateKey";
 
 export const githubPrsPatchRouter = new OpenAPIHono();
 
@@ -40,6 +40,7 @@ githubPrsPatchRouter.openapi(
   async (c) => {
     const accessToken = await getAccessTokenFromRequest(c.req.raw);
     if (!accessToken) return c.text("Unauthorized", 401);
+    if (!isGitHubAppConfigured()) return c.json({ error: "GitHub App not configured" }, 501);
 
     const { team, owner, repo, number, format = "patch" } = c.req.valid("query");
     const convex = getConvex({ accessToken });

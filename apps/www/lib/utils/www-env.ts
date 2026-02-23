@@ -8,9 +8,9 @@ export const env = createEnv({
     STACK_SECRET_SERVER_KEY: z.string().min(1),
     STACK_SUPER_SECRET_ADMIN_KEY: z.string().min(1),
     STACK_DATA_VAULT_SECRET: z.string().min(32), // For secure DataBook storage
-    // GitHub App
-    CMUX_GITHUB_APP_ID: z.string().min(1),
-    CMUX_GITHUB_APP_PRIVATE_KEY: z.string().min(1),
+    // GitHub App (optional — repo/PR features require it)
+    CMUX_GITHUB_APP_ID: z.string().min(1).optional(),
+    CMUX_GITHUB_APP_PRIVATE_KEY: z.string().min(1).optional(),
     // Morph
     MORPH_API_KEY: z.string().min(1),
     OPENAI_API_KEY: z.string().min(1).optional(),

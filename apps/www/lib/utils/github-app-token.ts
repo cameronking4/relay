@@ -1,6 +1,6 @@
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "octokit";
-import { githubPrivateKey } from "./githubPrivateKey";
+import { githubPrivateKey, isGitHubAppConfigured } from "./githubPrivateKey";
 import { env } from "./www-env";
 
 interface GenerateInstallationTokenOptions {
@@ -36,6 +36,9 @@ export async function generateGitHubInstallationToken({
     metadata: "read",
   },
 }: GenerateInstallationTokenOptions): Promise<string> {
+  if (!isGitHubAppConfigured()) {
+    throw new Error("GitHub App not configured");
+  }
   // Check cache first
   const cacheKey = getTokenCacheKey(installationId, permissions);
   const cached = tokenCache.get(cacheKey);
@@ -113,6 +116,7 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 export async function getInstallationForRepo(
   repository: string
 ): Promise<number | null> {
+  if (!isGitHubAppConfigured()) return null;
   // Extract owner and repo from repository (format: owner/repo)
   const [owner, repo] = repository.split("/");
   if (!owner || !repo) return null;

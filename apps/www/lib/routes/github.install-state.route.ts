@@ -4,7 +4,7 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "octokit";
 import { env } from "@/lib/utils/www-env";
-import { githubPrivateKey } from "../utils/githubPrivateKey";
+import { githubPrivateKey, isGitHubAppConfigured } from "../utils/githubPrivateKey";
 import { getConvex } from "../utils/get-convex";
 
 export const githubInstallStateRouter = new OpenAPIHono();
@@ -67,6 +67,9 @@ githubInstallStateRouter.openapi(
     const accessToken = await getAccessTokenFromRequest(c.req.raw);
     if (!accessToken) {
       return c.text("Unauthorized", 401);
+    }
+    if (!isGitHubAppConfigured()) {
+      return c.json({ error: "GitHub App not configured" }, 501);
     }
 
     const body = c.req.valid("json");

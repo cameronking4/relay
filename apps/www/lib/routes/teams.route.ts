@@ -297,6 +297,26 @@ teamsRouter.openapi(
         }
       }
 
+      // Sync team and creator membership to Convex immediately so setSlug (and
+      // subsequent membership checks) succeed without waiting for Stack webhooks.
+      try {
+        await convex.mutation(api.stack.upsertTeamPublic, {
+          id: createdTeam.id,
+          displayName: createdTeam.displayName ?? undefined,
+          profileImageUrl: undefined,
+          clientMetadata: createdTeam.clientMetadata,
+          clientReadOnlyMetadata: createdTeam.clientReadOnlyMetadata,
+          serverMetadata: undefined,
+          createdAtMillis: Date.now(),
+        });
+        await convex.mutation(api.stack.ensureMembershipPublic, {
+          teamId: createdTeam.id,
+          userId: user.id,
+        });
+      } catch (syncError) {
+        console.error("Failed to sync new team to Convex", { teamId: createdTeam.id, syncError });
+      }
+
       const start = Date.now();
       let slugSet = false;
       let lastError: unknown;

@@ -120,6 +120,20 @@ function TeamPicker() {
     [ensureMembershipPublic, navigate, upsertTeamPublic, user, app.urls.accountSettings]
   );
 
+  const handleSignOut = useCallback(async () => {
+    try {
+      if (user) {
+        await user.signOut({
+          redirectUrl: stackClientApp.urls.afterSignOut,
+        });
+      } else {
+        await stackClientApp.redirectToSignOut({ replace: true });
+      }
+    } catch (error) {
+      console.error("Sign out failed", error);
+    }
+  }, [user]);
+
   return (
     <div className="min-h-dvh w-full bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center p-6">
       {isElectron ? (
@@ -130,13 +144,21 @@ function TeamPicker() {
       ) : null}
       <div className="mx-auto w-full max-w-3xl">
         <Card className="border-neutral-200 dark:border-neutral-800 bg-white/70 dark:bg-neutral-900/70 backdrop-blur">
-          <CardHeader>
+          <CardHeader className="relative">
             <CardTitle className="text-neutral-900 dark:text-neutral-50">
               Choose a team
             </CardTitle>
             <CardDescription className="text-neutral-600 dark:text-neutral-400">
               Pick a team to continue. You can switch teams anytime.
             </CardDescription>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSignOut}
+              className="absolute top-2 right-2 text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+            >
+              Sign out
+            </Button>
           </CardHeader>
           <CardContent>
             {teams.length === 0 ? (
