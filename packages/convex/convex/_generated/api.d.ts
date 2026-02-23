@@ -12,6 +12,7 @@ import type * as analytics from "../analytics.js";
 import type * as anthropic_http from "../anthropic_http.js";
 import type * as apiKeys from "../apiKeys.js";
 import type * as backfill from "../backfill.js";
+import type * as backfillMutations from "../backfillMutations.js";
 import type * as bedrock_utils from "../bedrock_utils.js";
 import type * as cloudRouterSubscription from "../cloudRouterSubscription.js";
 import type * as cmux_http from "../cmux_http.js";
@@ -98,6 +99,7 @@ declare const fullApi: ApiFromModules<{
   anthropic_http: typeof anthropic_http;
   apiKeys: typeof apiKeys;
   backfill: typeof backfill;
+  backfillMutations: typeof backfillMutations;
   bedrock_utils: typeof bedrock_utils;
   cloudRouterSubscription: typeof cloudRouterSubscription;
   cmux_http: typeof cmux_http;
