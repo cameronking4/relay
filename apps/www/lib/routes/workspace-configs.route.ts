@@ -39,7 +39,7 @@ async function loadEnvVarsContent(
   dataVaultKey: string | undefined,
 ): Promise<string> {
   if (!dataVaultKey) return "";
-  const store = await stackServerAppJs.getDataVaultStore("cmux-snapshot-envs");
+  const store = await stackServerAppJs.getDataVaultStore("relay-vault");
   const value = await store.getValue(dataVaultKey, {
     secret: env.STACK_DATA_VAULT_SECRET,
   });
