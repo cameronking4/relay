@@ -146,7 +146,7 @@ workspaceConfigsRouter.openapi(
     });
 
     const store = await stackServerAppJs.getDataVaultStore(
-      "cmux-snapshot-envs",
+      "relay-vault",
     );
     const envVarsContent = body.envVarsContent ?? "";
     let dataVaultKey = existing?.dataVaultKey;

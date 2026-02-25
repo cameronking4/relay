@@ -195,7 +195,7 @@ export default async function PreviewConfigurePage({ searchParams }: PageProps) 
 
         // Fetch environment variables directly from Stack Data Vault
         try {
-          const store = await stackServerApp.getDataVaultStore("cmux-snapshot-envs");
+          const store = await stackServerApp.getDataVaultStore("relay-vault");
           const varsContent = await store.getValue(environment.dataVaultKey, {
             secret: env.STACK_DATA_VAULT_SECRET,
           });

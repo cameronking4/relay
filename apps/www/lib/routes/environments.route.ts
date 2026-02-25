@@ -273,7 +273,7 @@ environmentsRouter.openapi(
       const persistDataVaultPromise = (async () => {
         const dataVaultKey = `env_${randomBytes(16).toString("hex")}`;
         const store =
-          await stackServerAppJs.getDataVaultStore("cmux-snapshot-envs");
+          await stackServerAppJs.getDataVaultStore("relay-vault");
         await store.setValue(dataVaultKey, body.envVarsContent, {
           secret: env.STACK_DATA_VAULT_SECRET,
         });
@@ -499,7 +499,7 @@ environmentsRouter.openapi(
 
       // Retrieve environment variables from StackAuth DataBook
       const store =
-        await stackServerAppJs.getDataVaultStore("cmux-snapshot-envs");
+        await stackServerAppJs.getDataVaultStore("relay-vault");
       const envVarsContent = await store.getValue(environment.dataVaultKey, {
         secret: env.STACK_DATA_VAULT_SECRET,
       });

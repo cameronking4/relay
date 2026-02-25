@@ -6,7 +6,7 @@ export const loadEnvironmentEnvVars = async (
 ): Promise<string | null> => {
   try {
     const store =
-      await stackServerAppJs.getDataVaultStore("cmux-snapshot-envs");
+      await stackServerAppJs.getDataVaultStore("relay-vault");
     const content = await store.getValue(dataVaultKey, {
       secret: env.STACK_DATA_VAULT_SECRET,
     });

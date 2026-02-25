@@ -7,7 +7,7 @@ const stackAdminApp = new StackServerApp({
   publishableClientKey: env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY,
   secretServerKey: env.STACK_SECRET_SERVER_KEY,
 });
-const store = await stackAdminApp.getDataVaultStore("cmux-snapshot-envs");
+const store = await stackAdminApp.getDataVaultStore("relay-vault");
 console.log("setting value");
 await store.setValue("testing123", "a very secure cat", {
   secret: env.STACK_DATA_VAULT_SECRET,
