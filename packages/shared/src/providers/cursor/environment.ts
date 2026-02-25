@@ -105,5 +105,36 @@ export async function getCursorEnvironment(
   startupCommands.push("mkdir -p ~/.cursor");
   startupCommands.push("mkdir -p ~/.config/cursor");
 
+  // Disable workspace trust for Cursor
+  const settingsJson = {
+    "security.workspace.trust.enabled": false,
+  };
+  const settingsBase64 = Buffer.from(JSON.stringify(settingsJson, null, 2)).toString("base64");
+
+  files.push({
+    destinationPath: "$HOME/.cursor/settings.json",
+    contentBase64: settingsBase64,
+    mode: "644",
+  });
+  files.push({
+    destinationPath: "$HOME/.config/cursor/settings.json",
+    contentBase64: settingsBase64,
+    mode: "644",
+  });
+
+  // Also pre-configure cli-config.json to skip dialogs if possible
+  const cliConfig = {
+    projects: {
+      "/root/workspace": {
+        hasTrustDialogAccepted: true,
+      }
+    }
+  };
+  files.push({
+    destinationPath: "$HOME/.cursor/cli-config.json",
+    contentBase64: Buffer.from(JSON.stringify(cliConfig, null, 2)).toString("base64"),
+    mode: "644",
+  });
+
   return { files, env, startupCommands };
 }

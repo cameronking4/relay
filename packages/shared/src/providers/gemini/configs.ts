@@ -6,8 +6,9 @@ import { getGeminiEnvironment } from "./environment";
 
 export const GEMINI_3_1_PRO_PREVIEW_CONFIG: AgentConfig = {
   name: "gemini/3.1-pro-preview",
-  command: "bunx",
+  command: "npx",
   args: [
+    "-y",
     "@google/gemini-cli@latest",
     "--model",
     "gemini-3.1-pro-preview",
@@ -23,8 +24,9 @@ export const GEMINI_3_1_PRO_PREVIEW_CONFIG: AgentConfig = {
 
 export const GEMINI_3_PRO_PREVIEW_CONFIG: AgentConfig = {
   name: "gemini/3-pro-preview",
-  command: "bunx",
+  command: "npx",
   args: [
+    "-y",
     "@google/gemini-cli@latest",
     "--model",
     "gemini-3-pro-preview",
@@ -40,8 +42,9 @@ export const GEMINI_3_PRO_PREVIEW_CONFIG: AgentConfig = {
 
 export const GEMINI_FLASH_CONFIG: AgentConfig = {
   name: "gemini/2.5-flash",
-  command: "bunx",
+  command: "npx",
   args: [
+    "-y",
     "@google/gemini-cli@latest",
     "--model",
     "gemini-2.5-flash",
@@ -57,8 +60,9 @@ export const GEMINI_FLASH_CONFIG: AgentConfig = {
 
 export const GEMINI_PRO_CONFIG: AgentConfig = {
   name: "gemini/2.5-pro",
-  command: "bunx",
+  command: "npx",
   args: [
+    "-y",
     "@google/gemini-cli@latest",
     "--model",
     "gemini-2.5-pro",

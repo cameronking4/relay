@@ -18,6 +18,7 @@ import {
 
 // Common args for all opencode configs - starts HTTP server for prompt submission
 const OPENCODE_BASE_ARGS = [
+  "-y",
   "opencode-ai@latest",
   "--hostname",
   OPENCODE_HTTP_HOST,
@@ -27,7 +28,7 @@ const OPENCODE_BASE_ARGS = [
 
 export const OPENCODE_GROK_CODE_CONFIG: AgentConfig = {
   name: "opencode/grok-code",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "opencode/grok-code"],
   environment: getOpencodeEnvironmentSkipAuth,
   checkRequirements: checkOpencodeRequirements,
@@ -37,7 +38,7 @@ export const OPENCODE_GROK_CODE_CONFIG: AgentConfig = {
 
 export const OPENCODE_SONNET_CONFIG: AgentConfig = {
   name: "opencode/sonnet-4",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "anthropic/claude-sonnet-4-20250514"],
   environment: getOpencodeEnvironment,
   checkRequirements: checkOpencodeRequirements,
@@ -47,7 +48,7 @@ export const OPENCODE_SONNET_CONFIG: AgentConfig = {
 
 export const OPENCODE_OPUS_CONFIG: AgentConfig = {
   name: "opencode/opus-4",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "anthropic/claude-opus-4-20250514"],
   environment: getOpencodeEnvironment,
   checkRequirements: checkOpencodeRequirements,
@@ -57,7 +58,7 @@ export const OPENCODE_OPUS_CONFIG: AgentConfig = {
 
 export const OPENCODE_KIMI_K2_CONFIG: AgentConfig = {
   name: "opencode/kimi-k2",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "openrouter/moonshotai/kimi-k2"],
   environment: getOpencodeEnvironment,
   checkRequirements: checkOpencodeRequirements,
@@ -67,7 +68,7 @@ export const OPENCODE_KIMI_K2_CONFIG: AgentConfig = {
 
 export const OPENCODE_QWEN3_CODER_CONFIG: AgentConfig = {
   name: "opencode/qwen3-coder",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "openrouter/qwen/qwen3-coder"],
   environment: getOpencodeEnvironment,
   checkRequirements: checkOpencodeRequirements,
@@ -77,7 +78,7 @@ export const OPENCODE_QWEN3_CODER_CONFIG: AgentConfig = {
 
 export const OPENCODE_GLM_Z1_32B_FREE_CONFIG: AgentConfig = {
   name: "opencode/glm-4.5",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "openrouter/z-ai/glm-4.5"],
   environment: getOpencodeEnvironment,
   checkRequirements: checkOpencodeRequirements,
@@ -87,7 +88,7 @@ export const OPENCODE_GLM_Z1_32B_FREE_CONFIG: AgentConfig = {
 
 export const OPENCODE_O3_PRO_CONFIG: AgentConfig = {
   name: "opencode/o3-pro",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "openai/o3-pro"],
   environment: getOpencodeEnvironment,
   checkRequirements: checkOpencodeRequirements,
@@ -97,7 +98,7 @@ export const OPENCODE_O3_PRO_CONFIG: AgentConfig = {
 
 export const OPENCODE_GPT_5_CONFIG: AgentConfig = {
   name: "opencode/gpt-5",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "openai/gpt-5"],
   environment: getOpencodeEnvironment,
   checkRequirements: checkOpencodeRequirements,
@@ -107,7 +108,7 @@ export const OPENCODE_GPT_5_CONFIG: AgentConfig = {
 
 export const OPENCODE_GPT_5_MINI_CONFIG: AgentConfig = {
   name: "opencode/gpt-5-mini",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "openai/gpt-5-mini"],
   environment: getOpencodeEnvironment,
   checkRequirements: checkOpencodeRequirements,
@@ -117,7 +118,7 @@ export const OPENCODE_GPT_5_MINI_CONFIG: AgentConfig = {
 
 export const OPENCODE_GPT_5_NANO_CONFIG: AgentConfig = {
   name: "opencode/gpt-5-nano",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "openai/gpt-5-nano"],
   environment: getOpencodeEnvironment,
   checkRequirements: checkOpencodeRequirements,
@@ -127,7 +128,7 @@ export const OPENCODE_GPT_5_NANO_CONFIG: AgentConfig = {
 
 export const OPENCODE_GPT_OSS_120B_CONFIG: AgentConfig = {
   name: "opencode/gpt-oss-120b",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "openrouter/openai/gpt-oss-120b"],
   environment: getOpencodeEnvironment,
   checkRequirements: checkOpencodeRequirements,
@@ -137,7 +138,7 @@ export const OPENCODE_GPT_OSS_120B_CONFIG: AgentConfig = {
 
 export const OPENCODE_GPT_OSS_20B_CONFIG: AgentConfig = {
   name: "opencode/gpt-oss-20b",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "openrouter/openai/gpt-oss-20b"],
   environment: getOpencodeEnvironment,
   checkRequirements: checkOpencodeRequirements,
@@ -147,7 +148,7 @@ export const OPENCODE_GPT_OSS_20B_CONFIG: AgentConfig = {
 
 export const OPENCODE_OPUS_4_1_20250805_CONFIG: AgentConfig = {
   name: "opencode/opus-4.1-20250805",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "anthropic/claude-opus-4-1-20250805"],
   environment: getOpencodeEnvironment,
   checkRequirements: checkOpencodeRequirements,
@@ -157,7 +158,7 @@ export const OPENCODE_OPUS_4_1_20250805_CONFIG: AgentConfig = {
 
 export const OPENCODE_GROK_4_1_FAST_CONFIG: AgentConfig = {
   name: "opencode/grok-4-1-fast",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "xai/grok-4-1-fast"],
   environment: getOpencodeEnvironmentWithXai,
   checkRequirements: checkOpencodeRequirements,
@@ -167,7 +168,7 @@ export const OPENCODE_GROK_4_1_FAST_CONFIG: AgentConfig = {
 
 export const OPENCODE_GROK_4_1_FAST_NON_REASONING_CONFIG: AgentConfig = {
   name: "opencode/grok-4-1-fast-non-reasoning",
-  command: "bunx",
+  command: "npx",
   args: [...OPENCODE_BASE_ARGS, "--model", "xai/grok-4-1-fast-non-reasoning"],
   environment: getOpencodeEnvironmentWithXai,
   checkRequirements: checkOpencodeRequirements,
