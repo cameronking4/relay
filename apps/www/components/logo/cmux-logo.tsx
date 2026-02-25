@@ -19,7 +19,7 @@ export default function CmuxLogo({
   from = "#00D4FF",
   to = "#7C3AED",
   showWordmark = true,
-  wordmarkText = "Manaflow",
+  wordmarkText = "Relay",
   wordmarkFill = "#fff",
   style,
   ...rest
