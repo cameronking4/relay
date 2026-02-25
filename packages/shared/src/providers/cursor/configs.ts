@@ -16,7 +16,7 @@ export const CURSOR_OPUS_4_1_CONFIG: AgentConfig = {
 export const CURSOR_GPT_5_CONFIG: AgentConfig = {
   name: "cursor/gpt-5",
   command: "/root/.local/bin/cursor-agent",
-  args: ["--force", "--model", "gpt-5", "$PROMPT"],
+  args: ["-p", "--force", "--model", "gpt-5", "$PROMPT"],
   environment: getCursorEnvironment,
   checkRequirements: checkCursorRequirements,
   apiKeys: [CURSOR_API_KEY],
@@ -26,7 +26,7 @@ export const CURSOR_GPT_5_CONFIG: AgentConfig = {
 export const CURSOR_SONNET_4_CONFIG: AgentConfig = {
   name: "cursor/sonnet-4",
   command: "/root/.local/bin/cursor-agent",
-  args: ["--force", "--model", "sonnet-4", "$PROMPT"],
+  args: ["-p", "--force", "--model", "sonnet-4", "$PROMPT"],
   environment: getCursorEnvironment,
   checkRequirements: checkCursorRequirements,
   apiKeys: [CURSOR_API_KEY],
@@ -36,7 +36,7 @@ export const CURSOR_SONNET_4_CONFIG: AgentConfig = {
 export const CURSOR_SONNET_4_THINKING_CONFIG: AgentConfig = {
   name: "cursor/sonnet-4-thinking",
   command: "/root/.local/bin/cursor-agent",
-  args: ["--force", "--model", "sonnet-4-thinking", "$PROMPT"],
+  args: ["-p", "--force", "--model", "sonnet-4-thinking", "$PROMPT"],
   environment: getCursorEnvironment,
   checkRequirements: checkCursorRequirements,
   apiKeys: [CURSOR_API_KEY],

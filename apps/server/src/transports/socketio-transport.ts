@@ -17,8 +17,27 @@ export function createSocketIOTransport(
   const defaultAllowed = new Set([
     "http://localhost:5173",
     "https://cmux.local",
+    "http://cmux.local",
     "https://www.cmux.sh",
+    "https://cmux.sh",
+    "https://www.cmux.dev",
+    "https://cmux.dev",
+    "https://www.manaflow.com",
+    "https://manaflow.com",
+    "https://relay-client-taupe.vercel.app",
+    "https://www.relay-client-taupe.vercel.app",
+    "https://relay-www-delta.vercel.app",
+    "https://www.relay-www-delta.vercel.app",
   ]);
+  // Allowed hostname suffixes – any origin whose hostname ends with one of
+  // these (including exact matches like "cmux.sh") is trusted.
+  const trustedHostnameSuffixes = [
+    ".cmux.sh",
+    ".cmux.dev",
+    ".manaflow.com",
+    ".cmux.local",
+    ".vercel.app",
+  ];
   const dynamicAllowed = new Set(
     (allowedOriginsEnv?.split(",") ?? []).map((s) => s.trim()).filter(Boolean)
   );
@@ -30,6 +49,12 @@ export function createSocketIOTransport(
       if (defaultAllowed.has(origin) || dynamicAllowed.has(origin)) return true;
       // Allow localhost during development regardless of port
       if (u.hostname === "localhost" || u.hostname === "127.0.0.1") return true;
+      // Allow all subdomains of trusted domains (e.g. app.manaflow.com)
+      for (const suffix of trustedHostnameSuffixes) {
+        if (u.hostname === suffix.slice(1) || u.hostname.endsWith(suffix)) {
+          return true;
+        }
+      }
     } catch {
       // Non-URL origin strings: be permissive
       return true;
