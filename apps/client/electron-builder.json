@@ -1,6 +1,6 @@
 {
-  "appId": "com.manaflow.app",
-  "productName": "Manaflow",
+  "appId": "com.relayagents.app",
+  "productName": "Relay",
   "directories": {
     "output": "dist-electron",
     "buildResources": "build"

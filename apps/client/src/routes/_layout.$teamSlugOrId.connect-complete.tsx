@@ -100,7 +100,7 @@ function ConnectComplete() {
               GitHub Connected
             </h1>
             <p className="mt-2 text-center text-sm text-neutral-600 dark:text-neutral-400">
-              You can now close this window and return to your Manaflow tab.
+              You can now close this window and return to your Relay tab.
             </p>
             <p
               className="mt-4 text-center text-xs text-neutral-500 dark:text-neutral-500"

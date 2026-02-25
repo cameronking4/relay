@@ -3,7 +3,7 @@
   "version": "0.0.1-dev",
   "description": "cloudrouter CLI (dev build) - cloud VMs with Chrome, VNC, SSH, rsync",
   "license": "MIT",
-  "author": "Manaflow",
+  "author": "Relay",
   "bin": {
     "cloudrouter-dev": "bin/cloudrouter-dev",
     "cr-dev": "bin/cloudrouter-dev"

@@ -247,7 +247,7 @@ function OnboardingTourSection({ teamSlugOrId }: { teamSlugOrId: string }) {
                 Product Tour
               </p>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                Take a guided tour of Manaflow to learn about its features and how to get the most out of it.
+                Take a guided tour of Relay to learn about its features and how to get the most out of it.
               </p>
             </div>
           </div>
@@ -772,7 +772,7 @@ function SettingsComponent() {
                     Display Name
                   </label>
                   <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-3">
-                    How your team is displayed across Manaflow.
+                    How your team is displayed across Relay.
                   </p>
                   <input
                     type="text"
@@ -1264,11 +1264,11 @@ function SettingsComponent() {
                           <ul className="list-disc ml-4 space-y-0.5">
                             <li>
                               Start a coding CLI (Claude Code, Codex CLI, Gemini
-                              CLI, Amp, Opencode) and complete its sign-in; Manaflow
+                              CLI, Amp, Opencode) and complete its sign-in; Relay
                               reuses that authentication.
                             </li>
                             <li>
-                              Or enter API keys here and Manaflow will use them
+                              Or enter API keys here and Relay will use them
                               directly.
                             </li>
                           </ul>

@@ -43,7 +43,7 @@
     "Rovo",
     "tmux"
   ],
-  "author": "Manaflow",
+  "author": "Relay",
   "license": "MIT",
   "dependencies": {
     "@cmux/server": "workspace:*",

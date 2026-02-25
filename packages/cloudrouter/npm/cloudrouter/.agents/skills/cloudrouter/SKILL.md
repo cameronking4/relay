@@ -404,7 +404,7 @@ Frontend: https://5173-xxx.e2b.app   <- WRONG: publicly accessible, no auth
 
 ### 0.9.18
 
-- All GPUs are now self-serve — no approval required. T4, L4, A10G, L40S, A100, A100-80GB, H100, H200, and B200 are all available without contacting Manaflow.
+- All GPUs are now self-serve — no approval required. T4, L4, A10G, L40S, A100, A100-80GB, H100, H200, and B200 are all available without contacting Relay.
 - Fixed documentation: browser automation command is `cloudrouter browser`, not `cloudrouter computer`. All references updated.
 - Updated production backend credentials (Convex site, project ID, publishable key, base URL).
 - Both `cloudrouter` and `cr` CLI aliases are supported and report the same version.

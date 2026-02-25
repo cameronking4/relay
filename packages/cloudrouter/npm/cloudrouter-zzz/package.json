@@ -12,7 +12,7 @@
     "morph"
   ],
   "license": "MIT",
-  "author": "Manaflow",
+  "author": "Relay",
   "bin": {
     "cloudrouter-zzz": "bin/cloudrouter-zzz"
   },

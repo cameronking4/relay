@@ -59,7 +59,7 @@ function publish() {
       "Rovo",
       "tmux",
     ],
-    author: "Manaflow",
+    author: "Relay",
     license: "MIT",
     engines: {
       node: ">=16.0.0",

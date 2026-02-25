@@ -16,7 +16,7 @@
   ],
   "homepage": "https://manaflow.com",
   "license": "MIT",
-  "author": "Manaflow",
+  "author": "Relay",
   "bin": {
     "cmux55": "bin/cmux55"
   },

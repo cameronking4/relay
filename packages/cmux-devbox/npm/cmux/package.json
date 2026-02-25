@@ -19,7 +19,7 @@
     "directory": "packages/cmux-devbox"
   },
   "license": "MIT",
-  "author": "Manaflow",
+  "author": "Relay",
   "bin": {
     "cmux": "bin/cmux"
   },

@@ -73,7 +73,7 @@ export function SignInComponent() {
                 {!browserSignInSupported ? (
                   <p className="mt-2 text-xs text-neutral-600 dark:text-neutral-400">
                     The <code className="font-mono">manaflow://</code> deeplink isn&apos;t registered on this machine for
-                    this app build. Restart Manaflow to re-register, or use the embedded sign-in below.
+                    this app build. Restart Relay to re-register, or use the embedded sign-in below.
                   </p>
                 ) : null}
               </div>

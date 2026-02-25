@@ -513,21 +513,21 @@ export function TaskTimeline({
                 key={c._id}
                 authorName={
                   isSystemAuthor
-                    ? "Manaflow"
+                    ? "Relay"
                     : user?.displayName ||
                       user?.primaryEmail?.split("@")[0] ||
                       "User"
                 }
                 avatar={
                   isSystemAuthor ? (
-                    <CmuxLogoMark height={20} label="Manaflow" />
+                    <CmuxLogoMark height={20} label="Relay" />
                   ) : undefined
                 }
                 authorImageUrl={
                   isSystemAuthor ? undefined : user?.profileImageUrl || ""
                 }
                 authorAlt={
-                  isSystemAuthor ? "Manaflow" : user?.primaryEmail || "User"
+                  isSystemAuthor ? "Relay" : user?.primaryEmail || "User"
                 }
                 timestamp={c.createdAt}
                 content={c.content}

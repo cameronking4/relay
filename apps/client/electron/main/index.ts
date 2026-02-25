@@ -949,11 +949,11 @@ app.whenReady().then(async () => {
     },
   });
 
-  // Ensure macOS menu and About panel use "Manaflow" instead of package.json name
+  // Ensure macOS menu and About panel use "Relay" instead of package.json name
   if (process.platform === "darwin") {
     try {
-      app.setName("Manaflow");
-      app.setAboutPanelOptions({ applicationName: "Manaflow" });
+      app.setName("Relay");
+      app.setAboutPanelOptions({ applicationName: "Relay" });
     } catch (error) {
       console.error("Failed to set app name and about panel options", error);
     }

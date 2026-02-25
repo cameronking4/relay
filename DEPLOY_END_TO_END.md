@@ -1,6 +1,6 @@
 # End-to-End Deployment Guide
 
-This guide walks through deploying the cmux (Manaflow) application from scratch: acquiring all required credentials, configuring each service, and verifying the deployment.
+This guide walks through deploying the cmux (Relay) application from scratch: acquiring all required credentials, configuring each service, and verifying the deployment.
 
 ---
 

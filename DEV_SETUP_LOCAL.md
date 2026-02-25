@@ -1,6 +1,6 @@
 # Local Development Setup Guide
 
-This guide is for new developers who have freshly cloned the repo and want to run the cmux (Manaflow) web app locally. It walks through prerequisites, environment setup, and starting the dev server.
+This guide is for new developers who have freshly cloned the repo and want to run the cmux (Relay) web app locally. It walks through prerequisites, environment setup, and starting the dev server.
 
 ---
 

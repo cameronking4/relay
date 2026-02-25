@@ -61,7 +61,7 @@ function useAutoUpdateNotifications() {
       const versionLabel = version ? ` (${version})` : "";
 
       const showRestartingToast = () => {
-        toast.loading("Restarting Manaflow...", {
+        toast.loading("Restarting Relay...", {
           id: AUTO_UPDATE_TOAST_ID,
           duration: Infinity,
           description: "Please wait while the update is being applied.",
@@ -72,7 +72,7 @@ function useAutoUpdateNotifications() {
       toast("New version available", {
         id: AUTO_UPDATE_TOAST_ID,
         duration: 30000,
-        description: `Restart Manaflow to apply the latest version${versionLabel}.`,
+        description: `Restart Relay to apply the latest version${versionLabel}.`,
         className: "select-none",
         action: cmux?.autoUpdate
           ? {

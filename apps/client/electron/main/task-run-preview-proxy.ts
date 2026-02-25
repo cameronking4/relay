@@ -81,6 +81,8 @@ const CMUX_DOMAINS = [
   "manaflow.local",
   "manaflow.localhost",
   "autobuild.app",
+  "relay-client-taupe.vercel.app",
+  "relay-www-delta.vercel.app",
 ] as const;
 
 const HTTP1_KEEP_ALIVE_AGENT = new http.Agent({

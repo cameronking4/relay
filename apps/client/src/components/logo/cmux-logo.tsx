@@ -159,7 +159,7 @@ export default function CmuxLogo({
           y={168}
           fontSize={106}
         >
-          Manaflow
+          Relay
         </text>
       )}
 
