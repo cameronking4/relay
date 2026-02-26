@@ -26,6 +26,8 @@ export const env = createEnv({
     NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY: z.string().min(1),
     NEXT_PUBLIC_CONVEX_URL: z.string().min(1),
     NEXT_PUBLIC_GITHUB_APP_SLUG: z.string().min(1).optional(),
+    NEXT_PUBLIC_WWW_ORIGIN: z.string().min(1).optional(),
+    NEXT_PUBLIC_SERVER_ORIGIN: z.string().min(1).optional(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

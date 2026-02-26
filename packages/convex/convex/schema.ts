@@ -345,6 +345,22 @@ const convexSchema = defineSchema({
     .index("by_task_run", ["taskRunId"])
     .index("by_pr", ["teamId", "repoFullName", "prNumber"]),
 
+  taskInvocations: defineTable({
+    invocationId: v.string(),
+    teamId: v.string(),
+    userId: v.string(),
+    idempotencyKey: v.optional(v.string()),
+    requestHash: v.string(),
+    taskId: v.optional(v.id("tasks")),
+    taskRunIds: v.optional(v.array(v.id("taskRuns"))),
+    startAckedAt: v.optional(v.number()),
+    startError: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_team_invocation", ["teamId", "invocationId"])
+    .index("by_team_user_idempotency", ["teamId", "userId", "idempotencyKey"]),
+
   taskRunScreenshotSets: defineTable({
     taskId: v.id("tasks"),
     runId: v.id("taskRuns"),

@@ -24,6 +24,7 @@ import {
   morphRouter,
   sandboxesRouter,
   teamsRouter,
+  taskInvocationsRouter,
   usersRouter,
   iframePreflightRouter,
   workspaceConfigsRouter,
@@ -145,6 +146,7 @@ app.route("/", iframePreflightRouter);
 app.route("/", environmentsRouter);
 app.route("/", sandboxesRouter);
 app.route("/", teamsRouter);
+app.route("/", taskInvocationsRouter);
 app.route("/", branchRouter);
 app.route("/", codeReviewRouter);
 app.route("/", workspaceConfigsRouter);
