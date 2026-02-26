@@ -674,6 +674,56 @@ export type CreateTeamRequest = {
     inviteEmails?: Array<string>;
 };
 
+export type TaskInvocationStatus = {
+    invocationId: string;
+    taskId: string;
+    taskRunIds: Array<string>;
+    phase: 'starting' | 'failed' | 'commit_complete' | 'pr_complete';
+    phaseReason?: string;
+    runCounts: {
+        pending: number;
+        running: number;
+        completed: number;
+        failed: number;
+        skipped: number;
+    };
+    prState: 'none' | 'draft' | 'open' | 'merged' | 'closed' | 'unknown';
+    errors: Array<{
+        taskRunId: string;
+        agentName?: string;
+        message: string;
+    }>;
+    links: {
+        task: string;
+        firstRun?: string;
+        status: string;
+        wait: string;
+    };
+    createdAt: number;
+    updatedAt: number;
+};
+
+export type TaskInvocationRepoTarget = {
+    repoUrl: string;
+    projectFullName: string;
+    branch?: string;
+};
+
+export type TaskInvocationEnvironmentTarget = {
+    environmentId: string;
+};
+
+export type StartTaskInvocationBody = {
+    prompt: string;
+    clis: Array<string>;
+    target: TaskInvocationRepoTarget | TaskInvocationEnvironmentTarget;
+    idempotencyKey?: string;
+};
+
+export type WaitTaskInvocationResponse = TaskInvocationStatus & {
+    timedOut: boolean;
+};
+
 export type GenerateBranchesResponse = {
     branchNames: Array<string>;
     baseBranchName: string;
@@ -2829,6 +2879,125 @@ export type PostApiTeamsResponses = {
 };
 
 export type PostApiTeamsResponse = PostApiTeamsResponses[keyof PostApiTeamsResponses];
+
+export type PostApiTeamsByTeamSlugOrIdTaskInvocationsData = {
+    body: StartTaskInvocationBody;
+    path: {
+        teamSlugOrId: string;
+    };
+    query?: never;
+    url: '/api/teams/{teamSlugOrId}/task-invocations';
+};
+
+export type PostApiTeamsByTeamSlugOrIdTaskInvocationsErrors = {
+    /**
+     * Invalid request
+     */
+    400: {
+        code: number;
+        message: string;
+    };
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Idempotency conflict
+     */
+    409: {
+        code: number;
+        message: string;
+    };
+    /**
+     * Failed to start invocation
+     */
+    500: unknown;
+};
+
+export type PostApiTeamsByTeamSlugOrIdTaskInvocationsError = PostApiTeamsByTeamSlugOrIdTaskInvocationsErrors[keyof PostApiTeamsByTeamSlugOrIdTaskInvocationsErrors];
+
+export type PostApiTeamsByTeamSlugOrIdTaskInvocationsResponses = {
+    /**
+     * Task invocation accepted
+     */
+    202: TaskInvocationStatus;
+};
+
+export type PostApiTeamsByTeamSlugOrIdTaskInvocationsResponse = PostApiTeamsByTeamSlugOrIdTaskInvocationsResponses[keyof PostApiTeamsByTeamSlugOrIdTaskInvocationsResponses];
+
+export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdData = {
+    body?: never;
+    path: {
+        teamSlugOrId: string;
+        invocationId: string;
+    };
+    query?: never;
+    url: '/api/teams/{teamSlugOrId}/task-invocations/{invocationId}';
+};
+
+export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Invocation not found
+     */
+    404: {
+        code: number;
+        message: string;
+    };
+};
+
+export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdError = GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdErrors[keyof GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdErrors];
+
+export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdResponses = {
+    /**
+     * Task invocation status
+     */
+    200: TaskInvocationStatus;
+};
+
+export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdResponse = GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdResponses[keyof GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdResponses];
+
+export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitData = {
+    body?: never;
+    path: {
+        teamSlugOrId: string;
+        invocationId: string;
+    };
+    query?: {
+        until?: 'commit_complete' | 'pr_complete';
+        timeoutSeconds?: number;
+        pollMs?: number;
+    };
+    url: '/api/teams/{teamSlugOrId}/task-invocations/{invocationId}/wait';
+};
+
+export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Invocation not found
+     */
+    404: {
+        code: number;
+        message: string;
+    };
+};
+
+export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitError = GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitErrors[keyof GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitErrors];
+
+export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitResponses = {
+    /**
+     * Task invocation status after waiting
+     */
+    200: WaitTaskInvocationResponse;
+};
+
+export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitResponse = GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitResponses[keyof GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitResponses];
 
 export type PostApiBranchesGenerateData = {
     body: GenerateBranchesBody;
