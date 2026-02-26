@@ -1,5 +1,6 @@
 "use node";
 
+import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject, type LanguageModel } from "ai";
 import { ConvexError, v } from "convex/values";
@@ -15,6 +16,14 @@ import { env } from "../../_shared/convex-env";
 import { action } from "../_generated/server";
 
 const OPENAI_CROWN_MODEL = "gpt-5-mini-2025-08-07";
+const ANTHROPIC_CROWN_MODEL = "claude-sonnet-4-5-20250929";
+
+type CrownModelProvider = "OpenAI" | "Anthropic";
+
+type CrownModelCandidate = {
+  provider: CrownModelProvider;
+  model: LanguageModel;
+};
 
 const CrownEvaluationCandidateValidator = v.object({
   runId: v.optional(v.string()),
@@ -25,26 +34,46 @@ const CrownEvaluationCandidateValidator = v.object({
   index: v.optional(v.number()),
 });
 
-function resolveCrownModel(): LanguageModel {
+function resolveCrownModelCandidates(): CrownModelCandidate[] {
+  const candidates: CrownModelCandidate[] = [];
+
   const openaiKey = env.OPENAI_API_KEY;
-  if (!openaiKey) {
+  if (openaiKey) {
+    const openai = createOpenAI({
+      apiKey: openaiKey,
+      baseURL: CLOUDFLARE_OPENAI_BASE_URL,
+    });
+    candidates.push({
+      provider: "OpenAI",
+      model: openai(OPENAI_CROWN_MODEL),
+    });
+  }
+
+  const anthropicKey = env.ANTHROPIC_API_KEY;
+  if (anthropicKey) {
+    const anthropic = createAnthropic({
+      apiKey: anthropicKey,
+    });
+    candidates.push({
+      provider: "Anthropic",
+      model: anthropic(ANTHROPIC_CROWN_MODEL),
+    });
+  }
+
+  if (candidates.length === 0) {
     throw new ConvexError(
-      "Crown evaluation is not configured (missing OpenAI API key)"
+      "Crown evaluation is not configured (missing OpenAI and Anthropic API keys)"
     );
   }
 
-  const openai = createOpenAI({
-    apiKey: openaiKey,
-    baseURL: CLOUDFLARE_OPENAI_BASE_URL,
-  });
-  return openai(OPENAI_CROWN_MODEL);
+  return candidates;
 }
 
 export async function performCrownEvaluation(
   prompt: string,
   candidates: CrownEvaluationCandidate[]
 ): Promise<CrownEvaluationResponse> {
-  const model = resolveCrownModel();
+  const modelCandidates = resolveCrownModelCandidates();
 
   const normalizedCandidates = candidates.map((candidate, idx) => {
     const resolvedIndex = candidate.index ?? idx;
@@ -89,28 +118,40 @@ Example response:
 
 IMPORTANT: Respond ONLY with the JSON object, no other text.`;
 
-  try {
-    const { object } = await generateObject({
-      model,
-      schema: CrownEvaluationResponseSchema,
-      system:
-        "You select the best implementation from structured diff inputs and explain briefly why.",
-      prompt: evaluationPrompt,
-      maxRetries: 2,
-    });
+  let lastError: unknown = null;
 
-    return CrownEvaluationResponseSchema.parse(object);
-  } catch (error) {
-    console.error("[convex.crown] Evaluation error", error);
-    throw new ConvexError("Evaluation failed");
+  for (const candidate of modelCandidates) {
+    try {
+      const { object } = await generateObject({
+        model: candidate.model,
+        schema: CrownEvaluationResponseSchema,
+        system:
+          "You select the best implementation from structured diff inputs and explain briefly why.",
+        prompt: evaluationPrompt,
+        maxRetries: 2,
+      });
+
+      return CrownEvaluationResponseSchema.parse(object);
+    } catch (error) {
+      console.error(
+        `[convex.crown] Evaluation error with ${candidate.provider}`,
+        error
+      );
+      lastError = error;
+    }
   }
+
+  if (lastError) {
+    console.error("[convex.crown] Evaluation failed for all configured models");
+  }
+  throw new ConvexError("Evaluation failed");
 }
 
 export async function performCrownSummarization(
   prompt: string,
   gitDiff: string
 ): Promise<CrownSummarizationResponse> {
-  const model = resolveCrownModel();
+  const modelCandidates = resolveCrownModelCandidates();
 
   const summarizationPrompt = `You are an expert reviewer summarizing a pull request.
 
@@ -139,21 +180,35 @@ OUTPUT FORMAT (Markdown)
 - Follow-ups: optional bullets if applicable
 `;
 
-  try {
-    const { object } = await generateObject({
-      model,
-      schema: CrownSummarizationResponseSchema,
-      system:
-        "You are an expert reviewer summarizing pull requests. Provide a clear, concise summary following the requested format.",
-      prompt: summarizationPrompt,
-      maxRetries: 2,
-    });
+  let lastError: unknown = null;
 
-    return CrownSummarizationResponseSchema.parse(object);
-  } catch (error) {
-    console.error("[convex.crown] Summarization error", error);
-    throw new ConvexError("Summarization failed");
+  for (const candidate of modelCandidates) {
+    try {
+      const { object } = await generateObject({
+        model: candidate.model,
+        schema: CrownSummarizationResponseSchema,
+        system:
+          "You are an expert reviewer summarizing pull requests. Provide a clear, concise summary following the requested format.",
+        prompt: summarizationPrompt,
+        maxRetries: 2,
+      });
+
+      return CrownSummarizationResponseSchema.parse(object);
+    } catch (error) {
+      console.error(
+        `[convex.crown] Summarization error with ${candidate.provider}`,
+        error
+      );
+      lastError = error;
+    }
   }
+
+  if (lastError) {
+    console.error(
+      "[convex.crown] Summarization failed for all configured models"
+    );
+  }
+  throw new ConvexError("Summarization failed");
 }
 
 export const evaluate = action({
