@@ -34,6 +34,7 @@ import { Route as LayoutTeamSlugOrIdEnvironmentsRouteImport } from './routes/_la
 import { Route as LayoutTeamSlugOrIdDiffRouteImport } from './routes/_layout.$teamSlugOrId.diff'
 import { Route as LayoutTeamSlugOrIdDashboardRouteImport } from './routes/_layout.$teamSlugOrId.dashboard'
 import { Route as LayoutTeamSlugOrIdConnectCompleteRouteImport } from './routes/_layout.$teamSlugOrId.connect-complete'
+import { Route as LayoutTeamSlugOrIdApiKeysRouteImport } from './routes/_layout.$teamSlugOrId.api-keys'
 import { Route as LayoutTeamSlugOrIdEnvironmentsIndexRouteImport } from './routes/_layout.$teamSlugOrId.environments.index'
 import { Route as LayoutTeamSlugOrIdTaskTaskIdRouteImport } from './routes/_layout.$teamSlugOrId.task.$taskId'
 import { Route as LayoutTeamSlugOrIdEnvironmentsNewVersionRouteImport } from './routes/_layout.$teamSlugOrId.environments.new-version'
@@ -181,6 +182,12 @@ const LayoutTeamSlugOrIdConnectCompleteRoute =
     path: '/connect-complete',
     getParentRoute: () => LayoutTeamSlugOrIdRoute,
   } as any)
+const LayoutTeamSlugOrIdApiKeysRoute =
+  LayoutTeamSlugOrIdApiKeysRouteImport.update({
+    id: '/api-keys',
+    path: '/api-keys',
+    getParentRoute: () => LayoutTeamSlugOrIdRoute,
+  } as any)
 const LayoutTeamSlugOrIdEnvironmentsIndexRoute =
   LayoutTeamSlugOrIdEnvironmentsIndexRouteImport.update({
     id: '/',
@@ -287,6 +294,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof LayoutProfileRoute
   '/team-picker': typeof LayoutTeamPickerRoute
   '/handler/$': typeof HandlerSplatRoute
+  '/$teamSlugOrId/api-keys': typeof LayoutTeamSlugOrIdApiKeysRoute
   '/$teamSlugOrId/connect-complete': typeof LayoutTeamSlugOrIdConnectCompleteRoute
   '/$teamSlugOrId/dashboard': typeof LayoutTeamSlugOrIdDashboardRoute
   '/$teamSlugOrId/diff': typeof LayoutTeamSlugOrIdDiffRoute
@@ -328,6 +336,7 @@ export interface FileRoutesByTo {
   '/profile': typeof LayoutProfileRoute
   '/team-picker': typeof LayoutTeamPickerRoute
   '/handler/$': typeof HandlerSplatRoute
+  '/$teamSlugOrId/api-keys': typeof LayoutTeamSlugOrIdApiKeysRoute
   '/$teamSlugOrId/connect-complete': typeof LayoutTeamSlugOrIdConnectCompleteRoute
   '/$teamSlugOrId/dashboard': typeof LayoutTeamSlugOrIdDashboardRoute
   '/$teamSlugOrId/diff': typeof LayoutTeamSlugOrIdDiffRoute
@@ -369,6 +378,7 @@ export interface FileRoutesById {
   '/_layout/profile': typeof LayoutProfileRoute
   '/_layout/team-picker': typeof LayoutTeamPickerRoute
   '/handler/$': typeof HandlerSplatRoute
+  '/_layout/$teamSlugOrId/api-keys': typeof LayoutTeamSlugOrIdApiKeysRoute
   '/_layout/$teamSlugOrId/connect-complete': typeof LayoutTeamSlugOrIdConnectCompleteRoute
   '/_layout/$teamSlugOrId/dashboard': typeof LayoutTeamSlugOrIdDashboardRoute
   '/_layout/$teamSlugOrId/diff': typeof LayoutTeamSlugOrIdDiffRoute
@@ -412,6 +422,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/team-picker'
     | '/handler/$'
+    | '/$teamSlugOrId/api-keys'
     | '/$teamSlugOrId/connect-complete'
     | '/$teamSlugOrId/dashboard'
     | '/$teamSlugOrId/diff'
@@ -453,6 +464,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/team-picker'
     | '/handler/$'
+    | '/$teamSlugOrId/api-keys'
     | '/$teamSlugOrId/connect-complete'
     | '/$teamSlugOrId/dashboard'
     | '/$teamSlugOrId/diff'
@@ -493,6 +505,7 @@ export interface FileRouteTypes {
     | '/_layout/profile'
     | '/_layout/team-picker'
     | '/handler/$'
+    | '/_layout/$teamSlugOrId/api-keys'
     | '/_layout/$teamSlugOrId/connect-complete'
     | '/_layout/$teamSlugOrId/dashboard'
     | '/_layout/$teamSlugOrId/diff'
@@ -711,6 +724,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutTeamSlugOrIdConnectCompleteRouteImport
       parentRoute: typeof LayoutTeamSlugOrIdRoute
     }
+    '/_layout/$teamSlugOrId/api-keys': {
+      id: '/_layout/$teamSlugOrId/api-keys'
+      path: '/api-keys'
+      fullPath: '/$teamSlugOrId/api-keys'
+      preLoaderRoute: typeof LayoutTeamSlugOrIdApiKeysRouteImport
+      parentRoute: typeof LayoutTeamSlugOrIdRoute
+    }
     '/_layout/$teamSlugOrId/environments/': {
       id: '/_layout/$teamSlugOrId/environments/'
       path: '/'
@@ -894,6 +914,7 @@ const LayoutTeamSlugOrIdTaskTaskIdRouteWithChildren =
   )
 
 interface LayoutTeamSlugOrIdRouteChildren {
+  LayoutTeamSlugOrIdApiKeysRoute: typeof LayoutTeamSlugOrIdApiKeysRoute
   LayoutTeamSlugOrIdConnectCompleteRoute: typeof LayoutTeamSlugOrIdConnectCompleteRoute
   LayoutTeamSlugOrIdDashboardRoute: typeof LayoutTeamSlugOrIdDashboardRoute
   LayoutTeamSlugOrIdDiffRoute: typeof LayoutTeamSlugOrIdDiffRoute
@@ -909,6 +930,7 @@ interface LayoutTeamSlugOrIdRouteChildren {
 }
 
 const LayoutTeamSlugOrIdRouteChildren: LayoutTeamSlugOrIdRouteChildren = {
+  LayoutTeamSlugOrIdApiKeysRoute: LayoutTeamSlugOrIdApiKeysRoute,
   LayoutTeamSlugOrIdConnectCompleteRoute:
     LayoutTeamSlugOrIdConnectCompleteRoute,
   LayoutTeamSlugOrIdDashboardRoute: LayoutTeamSlugOrIdDashboardRoute,

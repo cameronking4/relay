@@ -25,6 +25,7 @@ import {
   sandboxesRouter,
   teamsRouter,
   taskInvocationsRouter,
+  teamApiKeysRouter,
   usersRouter,
   iframePreflightRouter,
   workspaceConfigsRouter,
@@ -96,7 +97,13 @@ app.use(
       ...(clientPreviewOrigin ? [clientPreviewOrigin] : []),
     ],
     credentials: true,
-    allowHeaders: ["x-stack-auth", "content-type", "authorization"],
+    allowHeaders: [
+      "x-stack-auth",
+      "content-type",
+      "authorization",
+      "x-stack-api-key",
+      "x-cmux-actor-user-id",
+    ],
   }),
 );
 
@@ -147,6 +154,7 @@ app.route("/", environmentsRouter);
 app.route("/", sandboxesRouter);
 app.route("/", teamsRouter);
 app.route("/", taskInvocationsRouter);
+app.route("/", teamApiKeysRouter);
 app.route("/", branchRouter);
 app.route("/", codeReviewRouter);
 app.route("/", workspaceConfigsRouter);

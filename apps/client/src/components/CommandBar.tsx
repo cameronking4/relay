@@ -33,6 +33,7 @@ import {
   GitPullRequest,
   GraduationCap,
   Home,
+  KeyRound,
   LogOut,
   Monitor,
   Moon,
@@ -1465,6 +1466,11 @@ export function CommandBar({
           params: { teamSlugOrId },
           search: { ...environmentSearchDefaults },
         });
+      } else if (value === "api-keys") {
+        navigate({
+          to: "/$teamSlugOrId/api-keys",
+          params: { teamSlugOrId },
+        });
       } else if (value === "settings") {
         navigate({
           to: "/$teamSlugOrId/settings",
@@ -1698,6 +1704,24 @@ export function CommandBar({
           <>
             <Server className="h-4 w-4 text-neutral-500" />
             <span className="text-sm">Environments</span>
+          </>
+        ),
+      },
+      {
+        value: "api-keys",
+        label: "API Keys",
+        keywords: ["api", "key", "programmatic", "automation"],
+        searchText: buildSearchText(
+          "API Keys",
+          ["api key", "programmatic"],
+          ["api-keys"]
+        ),
+        className: baseCommandItemClassName,
+        execute: () => handleSelect("api-keys"),
+        renderContent: () => (
+          <>
+            <KeyRound className="h-4 w-4 text-neutral-500" />
+            <span className="text-sm">API Keys</span>
           </>
         ),
       },

@@ -45,4 +45,57 @@ describe("taskInvocationsRouter", () => {
 
     expect(response.status).toBe(401);
   });
+
+  it("requires actor header for API key auth on POST", async () => {
+    const response = await honoTestFetch(
+      "http://localhost/api/teams/demo/task-invocations",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Stack-Api-Key": "test_key",
+        },
+        body: JSON.stringify({
+          prompt: "hello",
+          clis: ["codex/gpt-5.3-codex-xhigh"],
+          target: {
+            repoUrl: "https://github.com/example/repo.git",
+            projectFullName: "example/repo",
+          },
+        }),
+      },
+    );
+
+    expect(response.status).toBe(400);
+  });
+
+  it("rejects invalid actor header format for API key auth on status", async () => {
+    const response = await honoTestFetch(
+      "http://localhost/api/teams/demo/task-invocations/invocation-1",
+      {
+        method: "GET",
+        headers: {
+          "X-Stack-Api-Key": "test_key",
+          "X-Cmux-Actor-User-Id": "!!!",
+        },
+      },
+    );
+
+    expect(response.status).toBe(400);
+  });
+
+  it("rejects invalid API keys", async () => {
+    const response = await honoTestFetch(
+      "http://localhost/api/teams/demo/task-invocations/invocation-1/wait",
+      {
+        method: "GET",
+        headers: {
+          "X-Stack-Api-Key": "invalid-team-key",
+          "X-Cmux-Actor-User-Id": "user_123",
+        },
+      },
+    );
+
+    expect(response.status).toBe(401);
+  });
 });

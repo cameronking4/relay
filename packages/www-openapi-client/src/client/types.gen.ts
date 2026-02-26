@@ -724,6 +724,40 @@ export type WaitTaskInvocationResponse = TaskInvocationStatus & {
     timedOut: boolean;
 };
 
+export type TeamApiKeyMetadata = {
+    id: string;
+    description: string;
+    lastFour: string;
+    createdAt: string;
+    expiresAt: string | null;
+    status: 'active' | 'revoked' | 'expired';
+};
+
+export type ListTeamApiKeysResponse = {
+    keys: Array<TeamApiKeyMetadata>;
+};
+
+export type TeamApiKeyError = {
+    code: number;
+    message: string;
+};
+
+export type CreateTeamApiKeyResponse = {
+    key: TeamApiKeyMetadata & {
+        value: string;
+    };
+};
+
+export type CreateTeamApiKeyBody = {
+    description: string;
+    expiresAt?: string | null;
+};
+
+export type RevokeTeamApiKeyResponse = {
+    revoked: boolean;
+    keyId: string;
+};
+
 export type GenerateBranchesResponse = {
     branchNames: Array<string>;
     baseBranchName: string;
@@ -2902,6 +2936,13 @@ export type PostApiTeamsByTeamSlugOrIdTaskInvocationsErrors = {
      */
     401: unknown;
     /**
+     * Forbidden
+     */
+    403: {
+        code: number;
+        message: string;
+    };
+    /**
      * Idempotency conflict
      */
     409: {
@@ -2937,9 +2978,26 @@ export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdData = {
 
 export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdErrors = {
     /**
+     * Invalid request
+     */
+    400: {
+        code: number;
+        message: string;
+    };
+    /**
      * Unauthorized
      */
-    401: unknown;
+    401: {
+        code: number;
+        message: string;
+    };
+    /**
+     * Forbidden
+     */
+    403: {
+        code: number;
+        message: string;
+    };
     /**
      * Invocation not found
      */
@@ -2976,9 +3034,26 @@ export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitData = {
 
 export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitErrors = {
     /**
+     * Invalid request
+     */
+    400: {
+        code: number;
+        message: string;
+    };
+    /**
      * Unauthorized
      */
-    401: unknown;
+    401: {
+        code: number;
+        message: string;
+    };
+    /**
+     * Forbidden
+     */
+    403: {
+        code: number;
+        message: string;
+    };
     /**
      * Invocation not found
      */
@@ -2998,6 +3073,104 @@ export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitResponses 
 };
 
 export type GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitResponse = GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitResponses[keyof GetApiTeamsByTeamSlugOrIdTaskInvocationsByInvocationIdWaitResponses];
+
+export type GetApiTeamsByTeamSlugOrIdAuthTeamApiKeysData = {
+    body?: never;
+    path: {
+        teamSlugOrId: string;
+    };
+    query?: never;
+    url: '/api/teams/{teamSlugOrId}/auth/team-api-keys';
+};
+
+export type GetApiTeamsByTeamSlugOrIdAuthTeamApiKeysErrors = {
+    /**
+     * Unauthorized
+     */
+    401: TeamApiKeyError;
+    /**
+     * Forbidden
+     */
+    403: TeamApiKeyError;
+};
+
+export type GetApiTeamsByTeamSlugOrIdAuthTeamApiKeysError = GetApiTeamsByTeamSlugOrIdAuthTeamApiKeysErrors[keyof GetApiTeamsByTeamSlugOrIdAuthTeamApiKeysErrors];
+
+export type GetApiTeamsByTeamSlugOrIdAuthTeamApiKeysResponses = {
+    /**
+     * Team API keys
+     */
+    200: ListTeamApiKeysResponse;
+};
+
+export type GetApiTeamsByTeamSlugOrIdAuthTeamApiKeysResponse = GetApiTeamsByTeamSlugOrIdAuthTeamApiKeysResponses[keyof GetApiTeamsByTeamSlugOrIdAuthTeamApiKeysResponses];
+
+export type PostApiTeamsByTeamSlugOrIdAuthTeamApiKeysData = {
+    body: CreateTeamApiKeyBody;
+    path: {
+        teamSlugOrId: string;
+    };
+    query?: never;
+    url: '/api/teams/{teamSlugOrId}/auth/team-api-keys';
+};
+
+export type PostApiTeamsByTeamSlugOrIdAuthTeamApiKeysErrors = {
+    /**
+     * Unauthorized
+     */
+    401: TeamApiKeyError;
+    /**
+     * Forbidden
+     */
+    403: TeamApiKeyError;
+};
+
+export type PostApiTeamsByTeamSlugOrIdAuthTeamApiKeysError = PostApiTeamsByTeamSlugOrIdAuthTeamApiKeysErrors[keyof PostApiTeamsByTeamSlugOrIdAuthTeamApiKeysErrors];
+
+export type PostApiTeamsByTeamSlugOrIdAuthTeamApiKeysResponses = {
+    /**
+     * Created team API key
+     */
+    201: CreateTeamApiKeyResponse;
+};
+
+export type PostApiTeamsByTeamSlugOrIdAuthTeamApiKeysResponse = PostApiTeamsByTeamSlugOrIdAuthTeamApiKeysResponses[keyof PostApiTeamsByTeamSlugOrIdAuthTeamApiKeysResponses];
+
+export type DeleteApiTeamsByTeamSlugOrIdAuthTeamApiKeysByKeyIdData = {
+    body?: never;
+    path: {
+        teamSlugOrId: string;
+        keyId: string;
+    };
+    query?: never;
+    url: '/api/teams/{teamSlugOrId}/auth/team-api-keys/{keyId}';
+};
+
+export type DeleteApiTeamsByTeamSlugOrIdAuthTeamApiKeysByKeyIdErrors = {
+    /**
+     * Unauthorized
+     */
+    401: TeamApiKeyError;
+    /**
+     * Forbidden
+     */
+    403: TeamApiKeyError;
+    /**
+     * API key not found
+     */
+    404: TeamApiKeyError;
+};
+
+export type DeleteApiTeamsByTeamSlugOrIdAuthTeamApiKeysByKeyIdError = DeleteApiTeamsByTeamSlugOrIdAuthTeamApiKeysByKeyIdErrors[keyof DeleteApiTeamsByTeamSlugOrIdAuthTeamApiKeysByKeyIdErrors];
+
+export type DeleteApiTeamsByTeamSlugOrIdAuthTeamApiKeysByKeyIdResponses = {
+    /**
+     * Team API key revoked
+     */
+    200: RevokeTeamApiKeyResponse;
+};
+
+export type DeleteApiTeamsByTeamSlugOrIdAuthTeamApiKeysByKeyIdResponse = DeleteApiTeamsByTeamSlugOrIdAuthTeamApiKeysByKeyIdResponses[keyof DeleteApiTeamsByTeamSlugOrIdAuthTeamApiKeysByKeyIdResponses];
 
 export type PostApiBranchesGenerateData = {
     body: GenerateBranchesBody;

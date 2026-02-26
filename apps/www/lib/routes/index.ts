@@ -26,3 +26,4 @@ export { codeReviewRouter } from "./code-review.route";
 export { workspaceConfigsRouter } from "./workspace-configs.route";
 export { previewRouter } from "./preview.route";
 export { taskInvocationsRouter } from "./tasks.invocations.route";
+export { teamApiKeysRouter } from "./team-api-keys.route";

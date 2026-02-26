@@ -1,6 +1,5 @@
 import { getConvex } from "@/lib/utils/get-convex";
-import { getUserFromRequest } from "@/lib/utils/auth";
-import { verifyTeamAccess } from "@/lib/utils/team-verification";
+import { resolveProgrammaticAuth } from "@/lib/utils/programmatic-auth";
 import { env } from "@/lib/utils/www-env";
 import {
   computeTaskInvocationStatus,
@@ -147,6 +146,14 @@ taskInvocationsRouter.openapi(
         },
       },
       401: { description: "Unauthorized" },
+      403: {
+        description: "Forbidden",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
       409: {
         description: "Idempotency conflict",
         content: {
@@ -159,25 +166,31 @@ taskInvocationsRouter.openapi(
     },
   }),
   async (c) => {
-    const user = await getUserFromRequest(c.req.raw);
-    if (!user) {
-      return c.json({ code: 401, message: "Unauthorized" }, 401);
-    }
-
-    const authJson = await user.getAuthJson();
-    const accessToken = authJson.accessToken;
-    if (!accessToken) {
-      return c.json({ code: 401, message: "Unauthorized" }, 401);
-    }
-
     const { teamSlugOrId } = c.req.valid("param");
     const body = c.req.valid("json");
+    let authContext: Awaited<ReturnType<typeof resolveProgrammaticAuth>>;
+    try {
+      authContext = await resolveProgrammaticAuth({
+        req: c.req.raw,
+        teamSlugOrId,
+      });
+    } catch (error) {
+      if (error instanceof HTTPException) {
+        const message = error.message || "Unauthorized";
+        if (error.status === 400) {
+          return c.json({ code: 400, message }, 400);
+        }
+        if (error.status === 401) {
+          return c.json({ code: 401, message }, 401);
+        }
+        if (error.status === 403) {
+          return c.json({ code: 403, message }, 403);
+        }
+      }
+      throw error;
+    }
 
-    await verifyTeamAccess({
-      req: c.req.raw,
-      accessToken,
-      teamSlugOrId,
-    });
+    const { accessToken, authJson } = authContext;
 
     const allowedClis = new Set(AGENT_CONFIGS.map((agent) => agent.name));
     const invalidCli = body.clis.find((cli) => !allowedClis.has(cli));
@@ -361,7 +374,30 @@ taskInvocationsRouter.openapi(
           },
         },
       },
-      401: { description: "Unauthorized" },
+      400: {
+        description: "Invalid request",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+      401: {
+        description: "Unauthorized",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+      403: {
+        description: "Forbidden",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
       404: {
         description: "Invocation not found",
         content: {
@@ -373,23 +409,30 @@ taskInvocationsRouter.openapi(
     },
   }),
   async (c) => {
-    const user = await getUserFromRequest(c.req.raw);
-    if (!user) {
-      return c.json({ code: 401, message: "Unauthorized" }, 401);
-    }
-
-    const authJson = await user.getAuthJson();
-    const accessToken = authJson.accessToken;
-    if (!accessToken) {
-      return c.json({ code: 401, message: "Unauthorized" }, 401);
-    }
-
     const { teamSlugOrId, invocationId } = c.req.valid("param");
-    await verifyTeamAccess({
-      req: c.req.raw,
-      accessToken,
-      teamSlugOrId,
-    });
+    let authContext: Awaited<ReturnType<typeof resolveProgrammaticAuth>>;
+    try {
+      authContext = await resolveProgrammaticAuth({
+        req: c.req.raw,
+        teamSlugOrId,
+      });
+    } catch (error) {
+      if (error instanceof HTTPException) {
+        const message = error.message || "Unauthorized";
+        if (error.status === 400) {
+          return c.json({ code: 400, message }, 400);
+        }
+        if (error.status === 401) {
+          return c.json({ code: 401, message }, 401);
+        }
+        if (error.status === 403) {
+          return c.json({ code: 403, message }, 403);
+        }
+      }
+      throw error;
+    }
+
+    const { accessToken } = authContext;
 
     const convex = getConvex({ accessToken });
     const wwwOrigin = resolveWwwOrigin(c.req.raw);
@@ -435,7 +478,30 @@ taskInvocationsRouter.openapi(
           },
         },
       },
-      401: { description: "Unauthorized" },
+      400: {
+        description: "Invalid request",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+      401: {
+        description: "Unauthorized",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+      403: {
+        description: "Forbidden",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
       404: {
         description: "Invocation not found",
         content: {
@@ -447,24 +513,31 @@ taskInvocationsRouter.openapi(
     },
   }),
   async (c) => {
-    const user = await getUserFromRequest(c.req.raw);
-    if (!user) {
-      return c.json({ code: 401, message: "Unauthorized" }, 401);
-    }
-
-    const authJson = await user.getAuthJson();
-    const accessToken = authJson.accessToken;
-    if (!accessToken) {
-      return c.json({ code: 401, message: "Unauthorized" }, 401);
-    }
-
     const { teamSlugOrId, invocationId } = c.req.valid("param");
     const query = c.req.valid("query");
-    await verifyTeamAccess({
-      req: c.req.raw,
-      accessToken,
-      teamSlugOrId,
-    });
+    let authContext: Awaited<ReturnType<typeof resolveProgrammaticAuth>>;
+    try {
+      authContext = await resolveProgrammaticAuth({
+        req: c.req.raw,
+        teamSlugOrId,
+      });
+    } catch (error) {
+      if (error instanceof HTTPException) {
+        const message = error.message || "Unauthorized";
+        if (error.status === 400) {
+          return c.json({ code: 400, message }, 400);
+        }
+        if (error.status === 401) {
+          return c.json({ code: 401, message }, 401);
+        }
+        if (error.status === 403) {
+          return c.json({ code: 403, message }, 403);
+        }
+      }
+      throw error;
+    }
+
+    const { accessToken } = authContext;
 
     const convex = getConvex({ accessToken });
     const wwwOrigin = resolveWwwOrigin(c.req.raw);

@@ -15,7 +15,7 @@ import { convexQuery } from "@convex-dev/react-query";
 import { Switch } from "@heroui/react";
 import { useUser } from "@stackframe/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useConvex } from "convex/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isElectron } from "@/lib/electron";
@@ -263,86 +263,32 @@ function OnboardingTourSection({ teamSlugOrId }: { teamSlugOrId: string }) {
   );
 }
 
-function ProgrammaticInvocationSection({
+function LegacyProgrammaticSection({
   teamSlugOrId,
 }: {
   teamSlugOrId: string;
 }) {
-  const encodedTeam = encodeURIComponent(teamSlugOrId);
-  const apiBase = `${WWW_ORIGIN}/api/teams/${encodedTeam}/task-invocations`;
-
-  const startCurl = `curl -X POST '${apiBase}' \\
-  -H 'Authorization: Bearer <stack_access_token>' \\
-  -H 'Content-Type: application/json' \\
-  -H 'Idempotency-Key: <unique-key>' \\
-  -d '{
-    "prompt": "Implement a health check endpoint and tests",
-    "clis": ["codex/gpt-5.3-codex-xhigh", "claude/opus-4.6"],
-    "target": {
-      "repoUrl": "https://github.com/owner/repo.git",
-      "projectFullName": "owner/repo",
-      "branch": "main"
-    }
-  }'`;
-
-  const statusCurl = `curl '${apiBase}/<invocationId>' \\
-  -H 'Authorization: Bearer <stack_access_token>'`;
-
-  const waitCurl = `curl '${apiBase}/<invocationId>/wait?until=commit_complete&timeoutSeconds=30&pollMs=2000' \\
-  -H 'Authorization: Bearer <stack_access_token>'`;
-
   return (
     <div className="bg-white dark:bg-neutral-950 rounded-lg border border-neutral-200 dark:border-neutral-800">
       <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800">
         <h2 className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-          Programmatic Invocation API
+          Programmatic Invocation
         </h2>
         <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-          Start tasks over HTTP and track them with status and wait endpoints.
+          Bearer token support remains available for backward compatibility.
         </p>
       </div>
-      <div className="p-4 space-y-4">
-        <div className="text-xs text-neutral-600 dark:text-neutral-300 space-y-2">
-          <p>
-            Authentication: Bearer Stack access token. Requests use your user identity and team access checks.
-          </p>
-          <p>
-            Idempotency: send <code>Idempotency-Key</code> to safely retry the same request.
-          </p>
-          <p>
-            Phases: <code>starting</code>, <code>failed</code>, <code>commit_complete</code>, <code>pr_complete</code>.
-          </p>
-          <p>
-            Tasks created through this API appear in the app like normal dashboard-submitted tasks.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-            Start invocation
-          </p>
-          <pre className="text-[11px] leading-5 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-md p-3 overflow-x-auto text-neutral-700 dark:text-neutral-300">
-            <code>{startCurl}</code>
-          </pre>
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-            Get status
-          </p>
-          <pre className="text-[11px] leading-5 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-md p-3 overflow-x-auto text-neutral-700 dark:text-neutral-300">
-            <code>{statusCurl}</code>
-          </pre>
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-            Wait for completion target
-          </p>
-          <pre className="text-[11px] leading-5 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-md p-3 overflow-x-auto text-neutral-700 dark:text-neutral-300">
-            <code>{waitCurl}</code>
-          </pre>
-        </div>
+      <div className="p-4 text-xs text-neutral-600 dark:text-neutral-300 flex items-center justify-between gap-4">
+        <p>
+          Manage Team API keys and use the recommended programmatic invocation flow from the dedicated API Keys page.
+        </p>
+        <Link
+          to="/$teamSlugOrId/api-keys"
+          params={{ teamSlugOrId }}
+          className="inline-flex items-center rounded-md px-3 py-1.5 text-xs font-medium bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 whitespace-nowrap"
+        >
+          Manage Team API Keys
+        </Link>
       </div>
     </div>
   );
@@ -1056,7 +1002,7 @@ function SettingsComponent() {
             <ConnectedAccountsSection teamSlugOrId={teamSlugOrId} />
 
             {/* Programmatic Invocation */}
-            <ProgrammaticInvocationSection teamSlugOrId={teamSlugOrId} />
+            <LegacyProgrammaticSection teamSlugOrId={teamSlugOrId} />
 
             {/* Appearance */}
             <div className="bg-white dark:bg-neutral-950 rounded-lg border border-neutral-200 dark:border-neutral-800">
