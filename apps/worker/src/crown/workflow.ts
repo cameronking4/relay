@@ -530,6 +530,37 @@ async function startCrownEvaluation({
       summaryPreview: summary?.slice(0, 120),
     });
 
+    log("INFO", "Single-run auto-PR decision", {
+      taskRunId,
+      autoPrEnabled: crownData.task.autoPrEnabled,
+      winnerRunId: candidate.runId,
+      branch: candidate.newBranch,
+    });
+
+    const prMetadata = await createPullRequest({
+      check: crownData,
+      winner: candidate,
+      summary,
+      context: runContext,
+    });
+
+    if (prMetadata?.pullRequest?.url) {
+      log("INFO", "Single-run auto-PR created", {
+        taskRunId,
+        pullRequestUrl: prMetadata.pullRequest.url,
+        pullRequestNumber: prMetadata.pullRequest.number ?? null,
+      });
+    } else if (crownData.task.autoPrEnabled) {
+      log(
+        "WARN",
+        "Single-run auto-PR did not complete; continuing crown finalization",
+        {
+          taskRunId,
+          winnerRunId: candidate.runId,
+        }
+      );
+    }
+
     await convexRequest(
       "/api/crown/finalize",
       runContext.token,
@@ -544,6 +575,9 @@ async function startCrownEvaluation({
         }),
         candidateRunIds: [candidate.runId],
         summary,
+        pullRequest: prMetadata?.pullRequest,
+        pullRequestTitle: prMetadata?.title,
+        pullRequestDescription: prMetadata?.description,
       },
       baseUrlOverride
     );
