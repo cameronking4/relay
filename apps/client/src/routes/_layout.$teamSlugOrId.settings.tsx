@@ -284,6 +284,9 @@ function SettingsComponent() {
   const [autoPrEnabled, setAutoPrEnabled] = useState<boolean>(false);
   const [originalAutoPrEnabled, setOriginalAutoPrEnabled] =
     useState<boolean>(false);
+  const [customInstructions, setCustomInstructions] = useState<string>("");
+  const [originalCustomInstructions, setOriginalCustomInstructions] =
+    useState<string>("");
   // const [isSaveButtonVisible, setIsSaveButtonVisible] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const saveButtonRef = useRef<HTMLDivElement>(null);
@@ -372,6 +375,9 @@ function SettingsComponent() {
   const { data: workspaceSettings } = useQuery(
     convexQuery(api.workspaceSettings.get, { teamSlugOrId })
   );
+  const { data: userEditorSettings } = useQuery(
+    convexQuery(api.userEditorSettings.get, { teamSlugOrId })
+  );
 
   // Initialize form values when data loads
   useEffect(() => {
@@ -419,6 +425,7 @@ function SettingsComponent() {
       return "Use lowercase letters, numbers, and hyphens; start/end with letter or number";
     return "";
   };
+  const normalizeCustomInstructions = (value: string): string => value.trim();
 
   // Initialize worktree path and heatmap settings when data loads
   useEffect(() => {
@@ -473,6 +480,19 @@ function SettingsComponent() {
       );
     }
   }, [workspaceSettings]);
+
+  useEffect(() => {
+    if (userEditorSettings === undefined) {
+      return;
+    }
+    const nextCustomInstructions = userEditorSettings?.customInstructions ?? "";
+    setCustomInstructions((prev) =>
+      prev === nextCustomInstructions ? prev : nextCustomInstructions
+    );
+    setOriginalCustomInstructions((prev) =>
+      prev === nextCustomInstructions ? prev : nextCustomInstructions
+    );
+  }, [userEditorSettings]);
 
   // Track save button visibility
   // Footer-based save button; no visibility tracking needed
@@ -576,6 +596,9 @@ function SettingsComponent() {
     const heatmapTooltipLanguageChanged = heatmapTooltipLanguage !== originalHeatmapTooltipLanguage;
     const heatmapColorsChanged =
       JSON.stringify(heatmapColors) !== JSON.stringify(originalHeatmapColors);
+    const customInstructionsChanged =
+      normalizeCustomInstructions(customInstructions) !==
+      normalizeCustomInstructions(originalCustomInstructions);
 
     return (
       worktreePathChanged ||
@@ -585,7 +608,8 @@ function SettingsComponent() {
       heatmapModelChanged ||
       heatmapThresholdChanged ||
       heatmapTooltipLanguageChanged ||
-      heatmapColorsChanged
+      heatmapColorsChanged ||
+      customInstructionsChanged
     );
   };
 
@@ -595,6 +619,7 @@ function SettingsComponent() {
     try {
       let savedCount = 0;
       let deletedCount = 0;
+      let customInstructionsUpdated = false;
 
       // Save worktree path / auto PR / heatmap settings if changed
       const workspaceSettingsChanged =
@@ -637,6 +662,20 @@ function SettingsComponent() {
         setOriginalContainerSettingsData(containerSettingsData);
       }
 
+      const normalizedCustomInstructions =
+        normalizeCustomInstructions(customInstructions);
+      const normalizedOriginalCustomInstructions =
+        normalizeCustomInstructions(originalCustomInstructions);
+      if (normalizedCustomInstructions !== normalizedOriginalCustomInstructions) {
+        await convex.mutation(api.userEditorSettings.setCustomInstructions, {
+          teamSlugOrId,
+          customInstructions: normalizedCustomInstructions || undefined,
+        });
+        setCustomInstructions(normalizedCustomInstructions);
+        setOriginalCustomInstructions(normalizedCustomInstructions);
+        customInstructionsUpdated = true;
+      }
+
       for (const key of apiKeys) {
         const value = apiKeyValues[key.envVar] || "";
         const originalValue = originalApiKeyValues[key.envVar] || "";
@@ -669,7 +708,7 @@ function SettingsComponent() {
       // After successful save, hide all API key inputs
       setShowKeys({});
 
-      if (savedCount > 0 || deletedCount > 0) {
+      if (savedCount > 0 || deletedCount > 0 || customInstructionsUpdated) {
         const actions = [];
         if (savedCount > 0) {
           actions.push(`saved ${savedCount} key${savedCount > 1 ? "s" : ""}`);
@@ -678,6 +717,9 @@ function SettingsComponent() {
           actions.push(
             `removed ${deletedCount} key${deletedCount > 1 ? "s" : ""}`
           );
+        }
+        if (customInstructionsUpdated) {
+          actions.push("updated custom instructions");
         }
         toast.success(`Successfully ${actions.join(" and ")}`);
       } else {
@@ -1209,6 +1251,34 @@ function SettingsComponent() {
                 </div>
               </div>
             )}
+
+            <div className="bg-white dark:bg-neutral-950 rounded-lg border border-neutral-200 dark:border-neutral-800">
+              <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-800">
+                <h2 className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                  Task Custom Instructions
+                </h2>
+              </div>
+              <div className="p-4">
+                <label
+                  htmlFor="customInstructions"
+                  className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2"
+                >
+                  Instructions appended to every task prompt
+                </label>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-3">
+                  These are concatenated to each submitted task prompt with two
+                  newlines. Leave empty to disable.
+                </p>
+                <textarea
+                  id="customInstructions"
+                  value={customInstructions}
+                  onChange={(e) => setCustomInstructions(e.target.value)}
+                  rows={6}
+                  className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 resize-y"
+                  placeholder="Always run tests before finishing. Prefer minimal, safe changes. Include a short summary of files changed."
+                />
+              </div>
+            </div>
 
             {/* AI Provider Authentication */}
             <div className="bg-white dark:bg-neutral-950 rounded-lg border border-neutral-200 dark:border-neutral-800">

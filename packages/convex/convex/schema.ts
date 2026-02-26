@@ -735,6 +735,7 @@ const convexSchema = defineSchema({
       )
     ),
     extensions: v.optional(v.string()), // newline-separated extension IDs
+    customInstructions: v.optional(v.string()), // appended to each task prompt
     updatedAt: v.number(),
   }).index("by_team_user", ["teamId", "userId"]),
 

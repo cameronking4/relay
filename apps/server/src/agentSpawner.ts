@@ -30,6 +30,7 @@ import {
   getEditorSettingsUpload,
   type UserUploadedEditorSettings,
 } from "./utils/editorSettings";
+import { composeTaskPrompt } from "./utils/composeTaskPrompt";
 import { env } from "./utils/server-env";
 import { getWwwClient } from "./utils/wwwClient";
 import { getWwwOpenApiModule } from "./utils/wwwOpenApiModule";
@@ -252,15 +253,33 @@ export async function spawnAgent(
       );
     }
 
+    const userEditorSettingsFromDb = await (async () => {
+      try {
+        return await getConvex().query(api.userEditorSettings.get, {
+          teamSlugOrId,
+        });
+      } catch (error) {
+        serverLogger.warn(
+          "[AgentSpawner] Failed to fetch user editor settings from Convex",
+          error
+        );
+        return null;
+      }
+    })();
+    const effectivePrompt = composeTaskPrompt(
+      processedTaskDescription,
+      userEditorSettingsFromDb?.customInstructions
+    );
+
     // Callback URL for stop hooks to call crown/complete (Convex site URL)
     const callbackUrl = env.NEXT_PUBLIC_CONVEX_URL.replace('.convex.cloud', '.convex.site');
 
     let envVars: Record<string, string> = {
-      CMUX_PROMPT: processedTaskDescription,
+      CMUX_PROMPT: effectivePrompt,
       CMUX_TASK_RUN_ID: taskRunId,
       CMUX_TASK_RUN_JWT: taskRunJwt,
       CMUX_CALLBACK_URL: callbackUrl,
-      PROMPT: processedTaskDescription,
+      PROMPT: effectivePrompt,
     };
 
     if (options.environmentId) {
@@ -320,7 +339,7 @@ export async function spawnAgent(
     if (agent.environment) {
       const envResult = await agent.environment({
         taskRunId: taskRunId,
-        prompt: processedTaskDescription,
+        prompt: effectivePrompt,
         taskRunJwt,
         apiKeys,
         callbackUrl,
@@ -363,24 +382,13 @@ export async function spawnAgent(
 
     // Fetch user-uploaded editor settings from Convex (for web mode users)
     let userUploadedSettings: UserUploadedEditorSettings | null = null;
-    try {
-      const userEditorSettingsFromDb = await getConvex().query(
-        api.userEditorSettings.get,
-        { teamSlugOrId }
-      );
-      if (userEditorSettingsFromDb) {
-        userUploadedSettings = {
-          settingsJson: userEditorSettingsFromDb.settingsJson ?? undefined,
-          keybindingsJson: userEditorSettingsFromDb.keybindingsJson ?? undefined,
-          snippets: userEditorSettingsFromDb.snippets ?? undefined,
-          extensions: userEditorSettingsFromDb.extensions ?? undefined,
-        };
-      }
-    } catch (error) {
-      serverLogger.warn(
-        "[AgentSpawner] Failed to fetch user editor settings from Convex",
-        error
-      );
+    if (userEditorSettingsFromDb) {
+      userUploadedSettings = {
+        settingsJson: userEditorSettingsFromDb.settingsJson ?? undefined,
+        keybindingsJson: userEditorSettingsFromDb.keybindingsJson ?? undefined,
+        snippets: userEditorSettingsFromDb.snippets ?? undefined,
+        extensions: userEditorSettingsFromDb.extensions ?? undefined,
+      };
     }
 
     // Get editor settings (user-uploaded overrides auto-detected)
@@ -881,7 +889,7 @@ chmod +x ${maintenanceScriptPath}`;
           ...actualArgs.map((arg) => {
             // Replace $CMUX_PROMPT with actual prompt value
             if (arg === "$CMUX_PROMPT") {
-              return processedTaskDescription;
+              return effectivePrompt;
             }
             return arg;
           }),
@@ -904,7 +912,7 @@ chmod +x ${maintenanceScriptPath}`;
       // For Codex: build command with prompt value directly embedded (like tmuxArgs does)
       const ptyArgs = actualArgs.map((arg) => {
         if (arg === "$CMUX_PROMPT") {
-          return processedTaskDescription;
+          return effectivePrompt;
         }
         return arg;
       });
@@ -937,7 +945,7 @@ chmod +x ${maintenanceScriptPath}`;
       env: envVars,
       taskRunContext: {
         taskRunToken: taskRunJwt,
-        prompt: processedTaskDescription,
+        prompt: effectivePrompt,
         convexUrl: env.NEXT_PUBLIC_CONVEX_URL,
       },
       taskRunId,

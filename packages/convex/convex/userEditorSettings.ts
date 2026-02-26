@@ -68,6 +68,46 @@ export const upsert = authMutation({
   },
 });
 
+// Set custom instructions that will be appended to each task prompt.
+export const setCustomInstructions = authMutation({
+  args: {
+    teamSlugOrId: v.string(),
+    customInstructions: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = ctx.identity.subject;
+    const teamId = await resolveTeamIdLoose(ctx, args.teamSlugOrId);
+    const existing = await ctx.db
+      .query("userEditorSettings")
+      .withIndex("by_team_user", (q) =>
+        q.eq("teamId", teamId).eq("userId", userId)
+      )
+      .first();
+    const now = Date.now();
+    const trimmedCustomInstructions = args.customInstructions?.trim();
+    const customInstructions =
+      trimmedCustomInstructions && trimmedCustomInstructions.length > 0
+        ? trimmedCustomInstructions
+        : undefined;
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        customInstructions,
+        updatedAt: now,
+      });
+      return existing._id;
+    }
+
+    const id = await ctx.db.insert("userEditorSettings", {
+      userId,
+      teamId,
+      customInstructions,
+      updatedAt: now,
+    });
+    return id;
+  },
+});
+
 // Clear user editor settings
 export const clear = authMutation({
   args: { teamSlugOrId: v.string() },
@@ -82,6 +122,19 @@ export const clear = authMutation({
       .first();
 
     if (existing) {
+      const hasCustomInstructions =
+        typeof existing.customInstructions === "string" &&
+        existing.customInstructions.trim().length > 0;
+      if (hasCustomInstructions) {
+        await ctx.db.patch(existing._id, {
+          settingsJson: undefined,
+          keybindingsJson: undefined,
+          snippets: undefined,
+          extensions: undefined,
+          updatedAt: Date.now(),
+        });
+        return;
+      }
       await ctx.db.delete(existing._id);
     }
   },
