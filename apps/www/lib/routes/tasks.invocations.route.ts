@@ -42,6 +42,13 @@ const StartTaskInvocationBodySchema = z
   })
   .openapi("StartTaskInvocationBody");
 
+type TaskInvocationTarget = z.infer<typeof StartTaskInvocationBodySchema>["target"];
+type EnvironmentTarget = z.infer<typeof EnvironmentTargetSchema>;
+
+function isEnvironmentTarget(target: TaskInvocationTarget): target is EnvironmentTarget {
+  return "environmentId" in target;
+}
+
 const RunCountsSchema = z.object({
   pending: z.number(),
   running: z.number(),
@@ -246,19 +253,20 @@ taskInvocationsRouter.openapi(
     let createdTaskRunIds: Id<"taskRuns">[] = [];
 
     try {
-      const isEnvironmentTarget = "environmentId" in body.target;
-      const environmentId = isEnvironmentTarget
-        ? typedZid("environments").parse(body.target.environmentId)
+      const target = body.target;
+      const targetIsEnvironment = isEnvironmentTarget(target);
+      const environmentId = targetIsEnvironment
+        ? typedZid("environments").parse(target.environmentId)
         : undefined;
 
       const createdTask = await convex.mutation(api.tasks.create, {
         teamSlugOrId,
         text: body.prompt,
-        ...(isEnvironmentTarget
+        ...(targetIsEnvironment
           ? { environmentId }
           : {
-              projectFullName: body.target.projectFullName,
-              baseBranch: body.target.branch,
+              projectFullName: target.projectFullName,
+              baseBranch: target.branch,
             }),
         selectedAgents: body.clis,
       });
@@ -278,7 +286,7 @@ taskInvocationsRouter.openapi(
         taskRunIds: createdTaskRunIds,
         clis: body.clis,
         prompt: body.prompt,
-        target: body.target,
+        target,
       });
 
       const startResult = await startTaskInvocation({
@@ -506,10 +514,10 @@ function buildStartTaskPayload({
   taskRunIds: Id<"taskRuns">[];
   clis: string[];
   prompt: string;
-  target: z.infer<typeof StartTaskInvocationBodySchema>["target"];
+  target: TaskInvocationTarget;
 }): StartTask {
-  const isEnvironmentTarget = "environmentId" in target;
-  const environmentId = isEnvironmentTarget
+  const targetIsEnvironment = isEnvironmentTarget(target);
+  const environmentId = targetIsEnvironment
     ? typedZid("environments").parse(target.environmentId)
     : undefined;
 
@@ -518,13 +526,13 @@ function buildStartTaskPayload({
     taskRunIds,
     selectedAgents: clis,
     taskDescription: prompt,
-    projectFullName: isEnvironmentTarget
+    projectFullName: targetIsEnvironment
       ? `env:${target.environmentId}`
       : target.projectFullName,
     isCloudMode: true,
-    ...(isEnvironmentTarget ? { environmentId } : {}),
-    ...(!isEnvironmentTarget ? { repoUrl: target.repoUrl } : {}),
-    ...(!isEnvironmentTarget && target.branch ? { branch: target.branch } : {}),
+    ...(targetIsEnvironment ? { environmentId } : {}),
+    ...(!targetIsEnvironment ? { repoUrl: target.repoUrl } : {}),
+    ...(!targetIsEnvironment && target.branch ? { branch: target.branch } : {}),
   };
 
   return basePayload;
@@ -573,11 +581,13 @@ async function getTaskInvocationStatus({
   });
 }
 
-function flattenTaskRuns(
-  runTree: Array<TaskInvocationRun & { children?: Array<TaskInvocationRun & { children?: unknown[] }> }>,
-): TaskInvocationRun[] {
+type TaskInvocationRunTreeNode = TaskInvocationRun & {
+  children?: TaskInvocationRunTreeNode[];
+};
+
+function flattenTaskRuns(runTree: TaskInvocationRunTreeNode[]): TaskInvocationRun[] {
   const flattened: TaskInvocationRun[] = [];
-  const stack: Array<TaskInvocationRun & { children?: Array<TaskInvocationRun & { children?: unknown[] }> }> = [...runTree];
+  const stack: TaskInvocationRunTreeNode[] = [...runTree];
 
   while (stack.length > 0) {
     const run = stack.pop();
